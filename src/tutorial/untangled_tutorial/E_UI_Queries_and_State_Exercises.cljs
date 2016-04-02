@@ -9,6 +9,12 @@
 (defui Person
   ;; TODO: Add a query for :db/id, :person/name, and a recursive access of :person/mate
   ;; TODO: Add an ident that uses :db/id
+  static om/Ident
+  (ident [this {:keys [id]}]
+    [:person/by-id id])
+  static om/IQuery
+  (query [this]
+    '[:db/id :person/name  {:person/mate ...}])
   Object
   (initLocalState [this] {:checked false})
   (render [this]
@@ -24,7 +30,9 @@
           (dom/span nil name))
         (when onDelete
           (dom/button #js {:onClick #(onDelete name)} "X"))
-        (when mate (dom/ul nil (om-person mate)))))))
+        (when (and mate (not (vector? mate)))
+          (dom/ul nil (om-person mate)))
+        ))))
 
 (def om-person (om/factory Person {:keyfn :db/id}))
 
@@ -45,10 +53,14 @@
 
 (defui Root
   ;; TODO: Add root query. Remember to include top-level properties and compose in PeopleWidget
+  static om/IQuery
+  (query [this]
+    `[:last-error :new-person {:widget [{:people ~(om/get-query Person)}]}])
   Object
   (render [this]
     (let [{:keys [widget new-person last-error]} (om/props this)]
       (dom/div nil
+        ;; (println widget)
         (dom/div nil (when (not= "" last-error) (str "Error " last-error)))
         (dom/div nil
           (people-widget widget)
