@@ -11,9 +11,11 @@
 
 (defcard-doc "# Mutation Exercises ")
 
-; TODO: Exercise 1: Implement this mutation
+                                        ; TODO: Exercise 1: Implement this mutation
 (defmethod m/mutate 'exercise/g-ex1-inc [{:keys [state]} k p]
-  )
+  {:action
+   (fn []
+     (swap! state update :n inc))})
 
 (defui ^:once Ex1-Root
   static om/IQuery
@@ -73,9 +75,11 @@
       (dom/div #js {:key react-key}
         (dom/ul nil (map ui-ex2-child items))))))
 
-; TODO: Exercise 2: Implement this mutation
+                                        ; TODO: Exercise 2: Implement this mutation
 (defmethod m/mutate 'exercise/g-ex2-inc [{:keys [state]} k {:keys [id]}]
-  )
+  {:action
+   (fn []
+     (swap! state update-in [:child/by-id id :n] inc))})
 
 (defcard mutation-exercise-2
   "## Exercise 2 - Mutation parameters
@@ -104,9 +108,9 @@
     (let [{:keys [id n]} (om/props this)]
       (dom/li nil
         (dom/span nil "n: " n)
-        ; TODO: Fix the rendering using transaction follow-on property reads
-        (dom/button #js {:onClick #(om/transact! this `[(exercise/g-ex2-inc {:id ~id})])} "Increment")
-        (dom/button #js {:onClick #(om/transact! this `[(exercise/g-ex3-dec {:id ~id})])} "Decrement")))))
+                                        ; TODO: Fix the rendering using transaction follow-on property reads
+        (dom/button #js {:onClick #(om/transact! this `[(exercise/g-ex2-inc {:id ~id}) :items])} "Increment")
+        (dom/button #js {:onClick #(om/transact! this `[(exercise/g-ex3-dec {:id ~id}) :items])} "Decrement")))))
 
 (def ui-ex3-item (om/factory Ex3-Item {:keyfn :id}))
 
@@ -166,8 +170,8 @@
   (untangled-app Ex3-Root)
   {:items       [[:child/by-id 1] [:child/by-id 2]]
    :lists       [[:list/by-id 1] [:list/by-id 2]]
-   :list/by-id  {1 {:id 1 :title "Small" :max 10}
-                 2 {:id 2 :title "Big" :min 11}}
+   :list/by-id  {1 {:id 1 :title "Small list" :max 10}
+                 2 {:id 2 :title "Big list" :min 9}}
    :child/by-id {1 {:id 1 :n 3}
                  2 {:id 2 :n 9}}}
   {:inspect-data true})
